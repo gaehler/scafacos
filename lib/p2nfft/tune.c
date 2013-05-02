@@ -1234,14 +1234,18 @@ static fcs_pnfft_complex* malloc_and_precompute_regkern_hat_0dp(
         xnorm = (xnorm < 0.5) ? xnorm : 0.5;
 
         /* calculate near and farfield regularization via interpolation */
-        if(xnorm < epsI)
+        if(xnorm < epsI){
           regkern_hat[m] = box_scale * ifcs_p2nfft_interpolation(
               xnorm, 1.0/epsI, interpolation_order, interpolation_num_nodes, near_interpolation_table_potential);
-        else if(xnorm < 0.5-epsB)
+          /* vgl. regularization.c, Zeile 262  */
+//           = ifcs_p2nfft_nearfield_correction_taylor2p(
+//           epsI * (fcs_float) k / num_nodes, p, taylor2p_coeff) / box_scale;
+        } else if(xnorm < 0.5-epsB) {
           regkern_hat[m] = 1.0/xnorm;
-        else
+        } else {
           regkern_hat[m] = ifcs_p2nfft_interpolation(
               xnorm - 0.5 + epsB, 1.0/epsB, interpolation_order, interpolation_num_nodes, far_interpolation_table_potential);
+        }
         
         regkern_hat[m] *= scale * twiddle;
 
