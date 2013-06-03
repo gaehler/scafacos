@@ -222,7 +222,7 @@ FCSResult ifcs_p2nfft_tune(
     local_sum_q += charges[i];
   MPI_Allreduce(&local_sum_q, &sum_q, 1, FCS_MPI_FLOAT, MPI_SUM, d->cart_comm_3d);
 //   if (!fcs_float_is_equal(sum_q, d->sum_q)) {
-  if (sum_q - d->sum_q > 1e-5) {
+  if (sum_q - d->sum_q > 1e-5) { /* FIXME: better use fcs_float_is_zero? */
 #if FCS_P2NFFT_DEBUG_RETUNE
     fprintf(stderr, "sum_q = %e, d->sum_q = %e\n", sum_q, d->sum_q);
 #endif
@@ -242,7 +242,7 @@ FCSResult ifcs_p2nfft_tune(
     local_sum_q2 += FCS_P2NFFT_SQR(charges[i] - d->bg_charge);
   MPI_Allreduce(&local_sum_q2, &sum_q2, 1, FCS_MPI_FLOAT, MPI_SUM, d->cart_comm_3d);
 //   if (!fcs_float_is_equal(sum_q2, d->sum_q2)) {
-  if (sum_q2 - d->sum_q2 > 1e-5) {
+  if (sum_q2 - d->sum_q2 > 1e-5) { /* FIXME: better use fcs_float_is_zero? */
 #if FCS_P2NFFT_DEBUG_RETUNE
     fprintf(stderr, "sum_q2 retune, sum_q2 = %e, d->sum_q2 = %e\n", sum_q2, d->sum_q2);
 #endif
@@ -315,7 +315,8 @@ FCSResult ifcs_p2nfft_tune(
       }
 
       /* set normalized near field radius */
-      d->epsI = d->r_cut / d->box_scales[0]; // FIXME: noncubic box
+      /* FIXME: noncubic box (periodic case only) */
+      d->epsI = d->r_cut / d->box_scales[0];
       
       /* Tune alpha for fixed N and m. */
       if(!d->tune_N && !d->tune_m){
@@ -609,7 +610,9 @@ FCSResult ifcs_p2nfft_tune(
         d->m = m;
 
       /* set unscaled near field radius */
-      d->r_cut = d->epsI * d->box_scales[0]; //FIXME: noncubic box
+      /* FIXME: nuncubic box; maybe, this number is rather senseless
+       * or needs to be different for each dimension in the noncubic case. */
+      d->r_cut = d->epsI * d->box_scales[0];
       d->one_over_r_cut = 1.0/d->r_cut;
 
       /* default oversampling equals 2 in nonperiodic case */
