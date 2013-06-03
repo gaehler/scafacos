@@ -315,7 +315,7 @@ FCSResult ifcs_p2nfft_tune(
       }
 
       /* set normalized near field radius */
-      d->epsI = d->r_cut / d->box_scales[0];
+      d->epsI = d->r_cut / d->box_scales[0]; // FIXME: noncubic box
       
       /* Tune alpha for fixed N and m. */
       if(!d->tune_N && !d->tune_m){
@@ -609,7 +609,7 @@ FCSResult ifcs_p2nfft_tune(
         d->m = m;
 
       /* set unscaled near field radius */
-      d->r_cut = d->epsI * d->box_scales[0];
+      d->r_cut = d->epsI * d->box_scales[0]; //FIXME: noncubic box
       d->one_over_r_cut = 1.0/d->r_cut;
 
       /* default oversampling equals 2 in nonperiodic case */
@@ -646,7 +646,7 @@ FCSResult ifcs_p2nfft_tune(
         d->near_interpolation_table_potential = (fcs_float*) malloc(sizeof(fcs_float) * (d->interpolation_num_nodes+3));
         init_near_interpolation_table_potential_0dp(
             d->interpolation_num_nodes,
-            d->epsI, d->p, d->box_scales[0],
+            d->epsI, d->p, d->box_scales[0], // FIXME: noncubic box
             d->taylor2p_coeff,
             d->N_cg_cos, d->cg_cos_coeff,
             d->near_interpolation_table_potential);
@@ -661,7 +661,7 @@ FCSResult ifcs_p2nfft_tune(
         d->near_interpolation_table_force = (fcs_float*) malloc(sizeof(fcs_float) * (d->interpolation_num_nodes+3));
         init_near_interpolation_table_force_0dp(
             d->interpolation_num_nodes,
-            d->epsI, d->p, d->box_scales[0],
+            d->epsI, d->p, d->box_scales[0], // FIXME: noncubic box
             d->taylor2p_derive_coeff,
             d->N_cg_cos, d->cg_cos_coeff,
             d->near_interpolation_table_force);
@@ -685,7 +685,7 @@ FCSResult ifcs_p2nfft_tune(
        printf("P2NFFT_INFO: Test of new Stochastical error bound for near plus far field error: cg_err_3d * sum_q2 * sqrt(3 / (M*V)) = %" FCS_LMOD_FLOAT "e\n",
            error * sum_q2 * sqrt(3.0 / (d->num_nodes*d->box_l[0]*d->box_l[1]*d->box_l[2])) );
        printf("P2NFFT_INFO: General error bound (depending on box scale=%" FCS_LMOD_FLOAT "e): cg_err_3d * sum_q_abs * sqrt(2.0/V_scale) = %" FCS_LMOD_FLOAT "e\n",
-           d->box_scales[0], error*sum_q_abs * sqrt(2.0 / (d->box_scales[0]*d->box_scales[1]*d->box_scales[2]) ));
+           d->box_scales[0], error*sum_q_abs * sqrt(2.0 / (d->box_scales[0]*d->box_scales[1]*d->box_scales[2]) )); // FIXME: noncubic box
      }
 #endif
     }
@@ -726,7 +726,7 @@ FCSResult ifcs_p2nfft_tune(
           d->local_N, d->local_N_start, d->box_l, d->alpha);
     else
       d->regkern_hat = malloc_and_precompute_regkern_hat_0dp(
-          d->N, d->epsI, d->epsB, d->box_scales[0],
+          d->N, d->epsI, d->epsB, d->box_scales[0], // FIXME: non-cubic box
           d->interpolation_order, d->interpolation_num_nodes, 
           d->near_interpolation_table_potential,
           d->far_interpolation_table_potential,

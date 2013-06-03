@@ -418,9 +418,9 @@ FCSResult ifcs_p2nfft_run(
       for(fcs_int t=0; t<3; t++)
         sorted_field[3 * j + t] -= creal(grad_f[3 * j + t]) / (FCS_P2NFFT_PI * box_vol * d->box_l[t]);
     } else {
-      sorted_potentials[j] += creal(f[j]) / d->box_scales[0];
+      sorted_potentials[j] += creal(f[j]) / d->box_scales[0]; // FIXME: noncubic box
       for(fcs_int t=0; t<3; t++)
-        sorted_field[3 * j + t] -= creal(grad_f[3 * j + t]) / (d->box_scales[0] * d->box_scales[0]);
+        sorted_field[3 * j + t] -= creal(grad_f[3 * j + t]) / (d->box_scales[0] * d->box_scales[0]); // FIXME: noncubic box
     }
   }
 
@@ -456,7 +456,7 @@ FCSResult ifcs_p2nfft_run(
     if(d->use_ewald)
       far_energy += 0.5 * sorted_charges[j] * f[j] / (FCS_P2NFFT_PI * box_vol);
     else
-      far_energy += 0.5 * sorted_charges[j] * f[j] / d->box_scales[0];
+      far_energy += 0.5 * sorted_charges[j] * f[j] / d->box_scales[0]; // FIXME: noncubic box
 
   MPI_Reduce(&far_energy, &far_global, 1, FCS_MPI_FLOAT, MPI_SUM, 0, d->cart_comm_3d);
   if (myrank == 0) fprintf(stderr, "P2NFFT_DEBUG: far field energy: %" FCS_LMOD_FLOAT "f\n", far_global);
