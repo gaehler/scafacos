@@ -243,6 +243,58 @@ static fcs_float regkern4(ifcs_p2nfft_kernel k, fcs_float xx, fcs_int p, const f
   return sum;
 } 
 
+/* regularized kernel for even kernels
+ * and in a noncubic box
+ * The value xx is assumed to be transformed
+ * to [-0.5, 0.5)^3. 
+ *
+ * Parameters:
+ * k: Function handle of the kernel,
+ * x: three-dimensional transformed argument,
+ * p: interpolation order,
+ * param: parameter for the kernel function,
+ * a: inner cutoff radius (without transformation),
+ * b: outer cutoff radius (with transformation),
+ * c: constant continuation value,
+ * box_scales: box box scales
+ * */
+
+static fcs_float regkern5(ifcs_p2nfft_kernel k, fcs_float* x, fcs_int p, const fcs_float *param, fcs_float a, fcs_float b, fcs_float c, fcs_float* box_scales)
+{
+  fcs_int j;
+  fcs_float sum = 0.0;
+  fcs_float usum = 0.0;
+  fcs_float xx;
+  fcs_float xxu;
+  fcs_int t;
+
+  for (t = 0; t < 3; ++t)
+    sum += x[t]*x[t];
+  xx = sqrt(sum);
+
+  for (t = 0; t < 3; ++t)
+    sum += box_scales[t] * box_scales[t] * x[t] * x[t];
+  xxu = sqrt(usum);
+
+
+  /* constant continuation for radii > 0.5 */
+  if (xx >= 0.5)
+    return c;
+
+  /* regulariziton at far field border */
+  if (xx >= 0.5 - b) {
+    return 0; // TODO
+  }
+
+  /* nearfield regularization */
+  if (xxu <= a) {
+    return 0; // TODO
+  }
+
+  /* farfield: original kernel function */
+  return k(xxu, 0, param);
+}
+
 
 fcs_float ifcs_p2nfft_regkernel(
     ifcs_p2nfft_kernel k, fcs_float xx, fcs_int p, const fcs_float *param, fcs_float epsI, fcs_float epsB
